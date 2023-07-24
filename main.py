@@ -39,6 +39,28 @@ def make_orders_stat(orders, warehouse_rates):
     return res_df
 
 
+# Task 4 function
+def find_warehouse_percent(orders, warehouse_rates):
+    # Формируем исходный df
+    orders = orders.copy()
+    res_df = orders.loc[:, ['warehouse_name', 'product', 'quantity']]
+    
+    # Считаем прибыль для каждого товара
+    res_df = res_df.merge(warehouse_rates, on='warehouse_name')
+    res_df['profit'] = orders.price * orders.quantity + orders.quantity * res_df.rate
+    
+    # Считаем процент прибыли товаров от общей прибыли товаров склада
+    warehouse_profit_series = res_df.groupby(['warehouse_name'], as_index=False)['profit'].sum()
+    res_df = res_df.merge(warehouse_profit_series, on='warehouse_name')
+    res_df = res_df.rename(columns={'profit_x': 'profit', 'profit_y': 'warehouse_profit'})
+    res_df['percent_profit_product_of_warehouse'] = res_df.profit / res_df.warehouse_profit * 100
+    
+    # Убираем все дубликаты товаров
+    res_df = res_df.drop(['rate', 'warehouse_profit'], axis=1)
+    res_df = res_df.groupby(['warehouse_name', 'product'], as_index=False).sum()
+    return res_df
+
+
 def main():
     with open('data.json', encoding='utf-8') as f:
         data = json.load(f)
@@ -61,6 +83,10 @@ def main():
     orders_stat = make_orders_stat(orders, warehouse_rates)
     print('Table 3:\n', orders_stat, end='\n\n')
     print('Средняя прибыль с заказа:', orders_stat.mean()[1], end='\n\n')
+
+    # Task 4
+    wh_percent = find_warehouse_percent(orders, warehouse_rates)
+    print('Table 4:\n', wh_percent, end='\n\n')
 
 
 if __name__ == '__main__':
