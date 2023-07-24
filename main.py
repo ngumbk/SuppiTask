@@ -27,6 +27,18 @@ def find_income_expenses_profit(orders, warehouse_rates):
     return res_df
 
 
+# Task 3 function
+def make_orders_stat(orders, warehouse_rates):
+    orders = orders.copy()
+    orders['cost'] = orders.price * orders.quantity
+    res_df = orders.groupby('order_id', as_index=False)['cost'].sum()
+    df_expenses = orders.groupby('order_id', as_index=False)['highway_cost'].first()
+    
+    res_df['order_profit'] = res_df.cost + df_expenses.highway_cost
+    res_df = res_df.drop(['cost'], axis=1)
+    return res_df
+
+
 def main():
     with open('data.json', encoding='utf-8') as f:
         data = json.load(f)
@@ -45,6 +57,11 @@ def main():
     iep = find_income_expenses_profit(orders, warehouse_rates)
     print('Table 2:\n', iep, end='\n\n')
     
+    # Task 3
+    orders_stat = make_orders_stat(orders, warehouse_rates)
+    print('Table 3:\n', orders_stat, end='\n\n')
+    print('Средняя прибыль с заказа:', orders_stat.mean()[1], end='\n\n')
+
 
 if __name__ == '__main__':
     main()
