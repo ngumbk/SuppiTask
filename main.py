@@ -70,6 +70,24 @@ def find_warehouse_cumulative_percent(warehouse_percent):
     return res_df   
 
 
+# Task 6 supportive function
+def find_category(percent):
+    if percent <= 70:
+        return 'A'
+    elif percent <= 90:
+        return 'B'
+    else:
+        return 'C'
+    
+
+# Task 6 function
+def make_category(warehouse_cumulative_percent):
+    res_df = warehouse_cumulative_percent.copy()
+    res_df['category'] = warehouse_cumulative_percent['accumulated_percent_profit_product_of_warehouse']
+    res_df['category'] = res_df['category'].apply(find_category)
+    return res_df
+
+
 def main():
     with open('data.json', encoding='utf-8') as f:
         data = json.load(f)
@@ -98,7 +116,10 @@ def main():
     
     # Task 5
     warehouse_cumulative_percent = find_warehouse_cumulative_percent(warehouse_percent)
-    print('Table 4:\n', warehouse_cumulative_percent, end='\n\n')
+
+    # Task 6
+    warehouse_with_categories = make_category(warehouse_cumulative_percent)
+    print('Table 4:\n', warehouse_with_categories, end='\n\n')
 
 
 if __name__ == '__main__':
