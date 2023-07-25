@@ -61,6 +61,15 @@ def find_warehouse_percent(orders, warehouse_rates):
     return res_df
 
 
+# Task 5 function
+def find_warehouse_cumulative_percent(warehouse_percent):
+    res_df = warehouse_percent.sort_values(by=['warehouse_name', 'percent_profit_product_of_warehouse'],
+                              ascending=False).reset_index(drop=True)
+    res_df['accumulated_percent_profit_product_of_warehouse'] = res_df['percent_profit_product_of_warehouse'].cumsum() % 100
+    res_df['accumulated_percent_profit_product_of_warehouse'] = res_df['accumulated_percent_profit_product_of_warehouse'].apply(lambda x: x if x != 0 else 100)
+    return res_df   
+
+
 def main():
     with open('data.json', encoding='utf-8') as f:
         data = json.load(f)
@@ -76,8 +85,8 @@ def main():
     print('Table 1:\n', warehouse_rates, end='\n\n')
 
     # Task 2
-    iep = find_income_expenses_profit(orders, warehouse_rates)
-    print('Table 2:\n', iep, end='\n\n')
+    products_stat = find_income_expenses_profit(orders, warehouse_rates)
+    print('Table 2:\n', products_stat, end='\n\n')
     
     # Task 3
     orders_stat = make_orders_stat(orders, warehouse_rates)
@@ -85,8 +94,11 @@ def main():
     print('Средняя прибыль с заказа:', orders_stat.mean()[1], end='\n\n')
 
     # Task 4
-    wh_percent = find_warehouse_percent(orders, warehouse_rates)
-    print('Table 4:\n', wh_percent, end='\n\n')
+    warehouse_percent = find_warehouse_percent(orders, warehouse_rates)
+    
+    # Task 5
+    warehouse_cumulative_percent = find_warehouse_cumulative_percent(warehouse_percent)
+    print('Table 4:\n', warehouse_cumulative_percent, end='\n\n')
 
 
 if __name__ == '__main__':
